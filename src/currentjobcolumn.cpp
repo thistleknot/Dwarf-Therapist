@@ -67,7 +67,7 @@ QStandardItem *CurrentJobColumn::build_cell(Dwarf *d) {
         }else if(!job->img_path().isEmpty()){
             pixmap_name = QString(":/activities/%1.png").arg(job->img_path());
         }
-        TRACE << "Unit:" << d->nice_name() << " jobID:" << job_id << "(" << job->name() << ")";
+        LOGT << "Unit:" << d->nice_name() << " jobID:" << job_id << "(" << job->name() << ")";
     }
 
     if(!QFile::exists(pixmap_name)){

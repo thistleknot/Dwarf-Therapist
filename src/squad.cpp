@@ -54,7 +54,7 @@ void Squad::read_data() {
     }
     // make sure our reference is up to date to the active memory layout
     m_mem = m_df->memory_layout();
-    TRACE << "Starting refresh of squad data at" << hexify(m_address);
+    LOGT << "Starting refresh of squad data at" << hexify(m_address);
 
     //qDeleteAll(m_members);
     m_members.clear();
@@ -69,7 +69,7 @@ void Squad::read_data() {
 
 void Squad::read_id() {
     m_id = m_df->read_int(m_mem->squad_field(m_address, "id"));
-    TRACE << "ID:" << m_id;
+    LOGT << "ID:" << m_id;
 }
 
 void Squad::read_name() {
@@ -77,7 +77,7 @@ void Squad::read_name() {
     QString alias = m_df->read_string(m_mem->squad_field(m_address, "alias"));
     if(alias != "")
         m_name = alias;
-    TRACE << "Name:" << m_name;
+    LOGT << "Name:" << m_name;
     m_pending_name = m_name;
 }
 

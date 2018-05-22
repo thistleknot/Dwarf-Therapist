@@ -54,7 +54,7 @@ void Languages::load_data() {
     }
     // make sure our reference is up to date to the active memory layout
     m_mem = m_df->memory_layout();
-    TRACE << "Starting refresh of Language data at" << hexify(m_address);
+    LOGT << "Starting refresh of Language data at" << hexify(m_address);
 
     LOGD << "Loading language translation tables";
     qDeleteAll(m_language);
@@ -64,9 +64,9 @@ void Languages::load_data() {
     VIRTADDR generic_lang_table = m_mem->global_address("language_vector");
     VIRTADDR translation_vector = m_mem->global_address("translation_vector");
     VIRTADDR word_table_offset = m_mem->language_offset("word_table");
-    TRACE << "LANGUAGES VECTOR" << hexify(translation_vector);
-    TRACE << "GENERIC LANGUAGE VECTOR" << hexify(generic_lang_table);
-    TRACE << "WORD TABLE OFFSET" << hexify(word_table_offset);
+    LOGT << "LANGUAGES VECTOR" << hexify(translation_vector);
+    LOGT << "GENERIC LANGUAGE VECTOR" << hexify(generic_lang_table);
+    LOGT << "WORD TABLE OFFSET" << hexify(word_table_offset);
 
     m_df->attach();
     if (generic_lang_table != static_cast<VIRTADDR>(-1) && generic_lang_table != 0) {
@@ -83,11 +83,11 @@ void Languages::load_data() {
         int id = 0;
         foreach(VIRTADDR lang, languages) {
             QString race_name = m_df->read_string(lang);
-            TRACE << "FOUND LANG ENTRY" << hex << lang << race_name;
+            LOGT << "FOUND LANG ENTRY" << hex << lang << race_name;
             VIRTADDR lang_table = lang + word_table_offset;
-            TRACE << "Loading " << race_name << " strings from" << hex << lang_table;
+            LOGT << "Loading " << race_name << " strings from" << hex << lang_table;
             QVector<VIRTADDR> lang_words = m_df->enumerate_vector(lang_table);
-            TRACE << race_name << " words" << lang_words.size();
+            LOGT << race_name << " words" << lang_words.size();
             QStringList words_list;
             foreach(VIRTADDR word_ptr, lang_words) {
                 if (word_ptr)

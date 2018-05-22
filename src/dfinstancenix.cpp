@@ -30,7 +30,7 @@ QString DFInstanceNix::calculate_checksum() {
         hash.addData(buf, len);
     }
     QString md5 = hexify(hash.result().mid(0, 4)).toLower();
-    TRACE << "GOT MD5:" << md5;
+    LOGT << "GOT MD5:" << md5;
     return md5;
 }
 

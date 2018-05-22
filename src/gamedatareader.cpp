@@ -58,7 +58,7 @@ GameDataReader::GameDataReader(QObject *parent)
         if(m_data_settings->childGroups().count() <= 0){
             QString err = tr("Dwarf Therapist cannot run because game_data.ini could not be found!");
             QMessageBox::critical(0,tr("Missing File"),err);
-            FATAL << err;
+            LOGF << err;
             exit(1);
         }
     }
@@ -69,7 +69,7 @@ GameDataReader::GameDataReader(QObject *parent)
         if(!m_data_settings->childGroups().contains(key)){
             QString err = tr("Dwarf Therapist cannot run because game_data.ini is missing [%1], a critical section!").arg(key);
             QMessageBox::critical(0,tr("Missing Section"),err);
-            FATAL << err;
+            LOGF << err;
             break;
         }
     }

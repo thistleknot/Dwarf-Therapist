@@ -76,7 +76,7 @@ void Material::load_data() {
         m_address = m_mem->material_field(m_address, "inorganic_materials_vector");
     }
 
-    TRACE << "Starting refresh of material data at" << hexify(m_address);
+    LOGT << "Starting refresh of material data at" << hexify(m_address);
 
     read_material();
 }

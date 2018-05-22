@@ -51,7 +51,7 @@ void Reaction::load_data() {
     }
     // make sure our reference is up to date to the active memory layout
     m_mem = m_df->memory_layout();
-    TRACE << "Starting refresh of Reaction data at" << hexify(m_address);
+    LOGT << "Starting refresh of Reaction data at" << hexify(m_address);
 
     read_reaction();
 }

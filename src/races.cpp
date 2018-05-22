@@ -67,7 +67,7 @@ void Race::load_data() {
     }
     // make sure our reference is up to date to the active memory layout
     m_mem = m_df->memory_layout();
-    TRACE << "Starting refresh of Race data at" << hexify(m_address);
+    LOGT << "Starting refresh of Race data at" << hexify(m_address);
 
     read_race();
 }
@@ -76,7 +76,7 @@ void Race::read_race() {
     m_df->attach();
     //m_id = m_df->read_int(m_address);
     m_name = capitalize(m_df->read_string(m_mem->race_field(m_address, "name_singular")));
-    TRACE << "RACE " << m_name << " at " << hexify(m_address);
+    LOGT << "RACE " << m_name << " at " << hexify(m_address);
     m_name_plural = capitalize(m_df->read_string(m_mem->race_field(m_address, "name_plural")));
     m_adjective = capitalize(m_df->read_string(m_mem->race_field(m_address, "adjective")));
 

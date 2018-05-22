@@ -144,13 +144,13 @@ private:
 if (GET_APPENDER(module) && GET_APPENDER(module)->minimum_level() > level); \
 else Streamer(GET_APPENDER(module), level, __FILE__, __LINE__, __FUNCTION__).stream()
 
-#define TRACE GET_LOG_BY_LEVEL_AND_MODULE(LL_TRACE, "core")
+#define LOGT GET_LOG_BY_LEVEL_AND_MODULE(LL_TRACE, "core")
 #define LOGV GET_LOG_BY_LEVEL_AND_MODULE(LL_VERBOSE, "core")
 #define LOGD GET_LOG_BY_LEVEL_AND_MODULE(LL_DEBUG, "core")
 #define LOGI GET_LOG_BY_LEVEL_AND_MODULE(LL_INFO, "core")
 #define LOGW GET_LOG_BY_LEVEL_AND_MODULE(LL_WARN, "core")
 #define LOGE GET_LOG_BY_LEVEL_AND_MODULE(LL_ERROR, "core")
-#define FATAL GET_LOG_BY_LEVEL_AND_MODULE(LL_FATAL, "core")
+#define LOGF GET_LOG_BY_LEVEL_AND_MODULE(LL_FATAL, "core")
 
 #define LOG_D(module) GET_LOG_BY_LEVEL_AND_MODULE(LL_DEBUG, module)
 

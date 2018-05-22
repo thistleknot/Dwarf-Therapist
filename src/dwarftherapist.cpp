@@ -120,17 +120,17 @@ DwarfTherapist::DwarfTherapist(int &argc, char **argv)
             parser.isSet(trace_option));
     load_translator();
 
-    TRACE << "Creating settings object";
+    LOGT << "Creating settings object";
     m_user_settings = StandardPaths::settings();
 
-    TRACE << "Creating options menu";
+    LOGT << "Creating options menu";
     m_options_menu = new OptionsMenu;
 
-    TRACE << "Creating main window";
+    LOGT << "Creating main window";
     m_main_window = new MainWindow;
     m_options_menu->setParent(m_main_window, Qt::Dialog);
 
-    TRACE << "connecting signals";
+    LOGT << "connecting signals";
     //connect(m_options_menu, SIGNAL(settings_changed()), SIGNAL(settings_changed())); // the telephone game...
     connect(m_options_menu, SIGNAL(settings_changed()), this, SLOT(read_settings()));
     connect(m_main_window->ui->act_options, SIGNAL(triggered()), m_options_menu, SLOT(exec()));
@@ -226,11 +226,11 @@ QList<Dwarf*> DwarfTherapist::get_dwarves(){
 }
 
 void DwarfTherapist::load_translator() {
-    TRACE << "loading translations";
+    LOGT << "loading translations";
     QTranslator translator;
     translator.load("dwarftherapist_en");
     installTranslator(&translator);
-    TRACE << "english translation loaded";
+    LOGT << "english translation loaded";
 }
 
 void DwarfTherapist::read_settings() {
@@ -613,9 +613,9 @@ void DwarfTherapist::load_game_translation_tables(DFInstance *df) {
     VIRTADDR generic_lang_table = df->memory_layout()->global_address("language_vector");
     VIRTADDR translation_vector = df->memory_layout()->global_address("translation_vector");
     VIRTADDR word_table_offset = df->memory_layout()->language_offset("word_table");
-    TRACE << "LANGUAGES VECTOR" << hexify(translation_vector);
-    TRACE << "GENERIC LANGUAGE VECTOR" << hexify(generic_lang_table);
-    TRACE << "WORD TABLE OFFSET" << hexify(word_table_offset);
+    LOGT << "LANGUAGES VECTOR" << hexify(translation_vector);
+    LOGT << "GENERIC LANGUAGE VECTOR" << hexify(generic_lang_table);
+    LOGT << "WORD TABLE OFFSET" << hexify(word_table_offset);
 
     df->attach();
     if (generic_lang_table != 0xFFFFFFFF && generic_lang_table != 0) {

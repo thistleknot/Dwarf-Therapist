@@ -57,6 +57,7 @@ THE SOFTWARE.
 #include <QTime>
 #include <QInputDialog>
 
+#include "dfinstancedfhack.h"
 #ifdef Q_OS_WIN
 #define LAYOUT_SUBDIR "windows"
 #include "dfinstancewindows.h"
@@ -136,6 +137,7 @@ DFInstance::DFInstance(QObject* parent)
 }
 
 DFInstance * DFInstance::newInstance(){
+    return new DFInstanceDFHack();
 #ifdef Q_OS_WIN
     return new DFInstanceWindows();
 #elif defined(Q_OS_MAC)
@@ -146,12 +148,12 @@ DFInstance * DFInstance::newInstance(){
 }
 
 bool DFInstance::check_vector(const VIRTADDR start, const VIRTADDR end, const VIRTADDR addr){
-    TRACE << "beginning vector enumeration at" << hex << addr;
-    TRACE << "start of vector" << hex << start;
-    TRACE << "end of vector" << hex << end;
+    LOGT << "beginning vector enumeration at" << hex << addr;
+    LOGT << "start of vector" << hex << start;
+    LOGT << "end of vector" << hex << end;
 
     int entries = (end - start) / m_pointer_size;
-    TRACE << "there appears to be" << entries << "entries in this vector";
+    LOGT << "there appears to be" << entries << "entries in this vector";
 
     bool is_acceptable_size = true;
 
@@ -276,13 +278,13 @@ QVector<VIRTADDR> DFInstance::enum_vec<VIRTADDR>(VIRTADDR addr) {
     else if (m_pointer_size == sizeof(VIRTADDR)) {
         out.resize(count);
         USIZE bytes_read = read_raw(start, bytes, out.data());
-        TRACE << "Found" << bytes_read / sizeof(VIRTADDR) << "pointers in vector at" << hexify(addr);
+        LOGT << "Found" << bytes_read / sizeof(VIRTADDR) << "pointers in vector at" << hexify(addr);
     }
     else {
         QByteArray buf;
         buf.resize(bytes);
         USIZE bytes_read = read_raw(start, bytes, buf.data());
-        TRACE << "Found" << bytes_read / m_pointer_size << "pointers in vector at" << hexify(addr);
+        LOGT << "Found" << bytes_read / m_pointer_size << "pointers in vector at" << hexify(addr);
 
         out.fill(0, count);
         auto out_it = out.begin();
@@ -384,7 +386,7 @@ QVector<Dwarf*> DFInstance::load_dwarves() {
     QVector<VIRTADDR> creatures_addrs = get_creatures();
 
     emit progress_range(0, creatures_addrs.size()-1);
-    TRACE << "FOUND" << creatures_addrs.size() << "creatures";
+    LOGT << "FOUND" << creatures_addrs.size() << "creatures";
     QTime t;
     t.start();
     if (!creatures_addrs.empty()) {
@@ -659,7 +661,7 @@ void DFInstance::load_reactions(){
     VIRTADDR reactions_vector = m_layout->global_address("reactions_vector");
     if(m_layout->is_valid_address(reactions_vector)){
         QVector<VIRTADDR> reactions = enumerate_vector(reactions_vector);
-        //TRACE << "FOUND" << reactions.size() << "reactions";
+        //LOGT << "FOUND" << reactions.size() << "reactions";
         //emit progress_range(0, reactions.size()-1);
         if (!reactions.empty()) {
             foreach(VIRTADDR reaction_addr, reactions) {

@@ -26,6 +26,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Qt5 REQUIRED COMPONENTS Qml Widgets Concurrent)
+find_package(Protobuf REQUIRED)
+find_package(DFHackClientQt REQUIRED)
 
 include(CPack)
 include(InstallRequiredSystemLibraries)
@@ -55,6 +57,10 @@ elseif(UNIX)
 else()
     message(FATAL_ERROR "unsupported target")
 endif()
+
+set(LIBS ${LIBS} ${PROTOBUF_LIBRARIES})
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS src/proto/remotememaccess.proto)
+set(SOURCES ${SOURCES} src/dfinstancedfhack.cpp ${PROTO_SRCS})
 
 # Portable build
 option(BUILD_PORTABLE "Build as portable application (look for files in the application directory)" OFF)
@@ -209,7 +215,7 @@ add_executable(${EXE_NAME} WIN32 MACOSX_BUNDLE
     thirdparty/qtcolorpicker-2.6/qtcolorpicker.cpp
     resources.qrc
     ${SOURCES})
-target_link_libraries(${EXE_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Qml Qt5::Network Qt5::Concurrent ${LIBS})
+target_link_libraries(${EXE_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Qml Qt5::Network Qt5::Concurrent DFHackClientQt::dfhack-client-qt ${LIBS})
 
 if (APPLE)
     set_target_properties(${EXE_NAME} PROPERTIES

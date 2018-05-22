@@ -123,7 +123,7 @@ public:
         } else {
             out.resize(bytes / sizeof(T));
             USIZE bytes_read = read_raw(start, bytes, out.data());
-            TRACE << "Found" << bytes_read / sizeof(T) << "things in vector at" << hexify(addr);
+            LOGT << "Found" << bytes_read / sizeof(T) << "things in vector at" << hexify(addr);
         }
         return out;
     }

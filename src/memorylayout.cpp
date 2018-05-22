@@ -12,7 +12,7 @@ MemoryLayout::MemoryLayout(DFInstance *df, const QFileInfo &fileinfo)
     , m_data(m_fileinfo.absoluteFilePath(), QSettings::IniFormat)
     , m_complete(true)
 {
-    TRACE << "Attempting to contruct MemoryLayout from file " << fileinfo.absoluteFilePath();
+    LOGT << "Attempting to contruct MemoryLayout from file " << fileinfo.absoluteFilePath();
 
     if (m_fileinfo.exists() && m_fileinfo.isReadable()) {
         load_data();

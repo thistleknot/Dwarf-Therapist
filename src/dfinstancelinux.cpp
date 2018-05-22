@@ -58,7 +58,7 @@ DFInstanceLinux::~DFInstanceLinux() {
 int DFInstanceLinux::wait_for_stopped() {
     int status;
     while(true) {
-        TRACE << "waiting for proc to stop";
+        LOGT << "waiting for proc to stop";
         pid_t w = waitpid(m_pid, &status, 0);
         if (w == -1) {
             // child died
@@ -69,16 +69,16 @@ int DFInstanceLinux::wait_for_stopped() {
         if (WIFSTOPPED(status)) {
             break;
         }
-        TRACE << "waitpid returned but child wasn't stopped, keep waiting...";
+        LOGT << "waitpid returned but child wasn't stopped, keep waiting...";
     }
     return status;
 }
 
 bool DFInstanceLinux::attach() {
-    TRACE << "STARTING ATTACH" << m_attach_count;
+    LOGT << "STARTING ATTACH" << m_attach_count;
     if (is_attached()) {
         m_attach_count++;
-        TRACE << "ALREADY ATTACHED SKIPPING..." << m_attach_count;
+        LOGT << "ALREADY ATTACHED SKIPPING..." << m_attach_count;
         return true;
     }
 
@@ -90,20 +90,20 @@ bool DFInstanceLinux::attach() {
     wait_for_stopped();
 
     m_attach_count++;
-    TRACE << "FINISHED ATTACH" << m_attach_count;
+    LOGT << "FINISHED ATTACH" << m_attach_count;
     return m_attach_count > 0;
 }
 
 bool DFInstanceLinux::detach() {
-    //TRACE << "STARTING DETACH" << m_attach_count;
+    //LOGT << "STARTING DETACH" << m_attach_count;
     m_attach_count--;
     if (m_attach_count > 0) {
-        TRACE << "NO NEED TO DETACH SKIPPING..." << m_attach_count;
+        LOGT << "NO NEED TO DETACH SKIPPING..." << m_attach_count;
         return true;
     }
 
     ptrace(PTRACE_DETACH, m_pid, 0, 0);
-    TRACE << "FINISHED DETACH" << m_attach_count;
+    LOGT << "FINISHED DETACH" << m_attach_count;
     return m_attach_count > 0;
 }
 
@@ -117,7 +117,7 @@ USIZE DFInstanceLinux::read_raw(const VIRTADDR addr, const USIZE bytes, void *bu
         return 0;
     }
 
-    TRACE << "Read" << bytes_read << "bytes of" << bytes << "bytes from" << hexify(addr) << "to" << buffer;
+    LOGT << "Read" << bytes_read << "bytes of" << bytes << "bytes from" << hexify(addr) << "to" << buffer;
 
     if ((size_t)bytes_read < bytes)
         memset((char *)buffer + bytes_read, 0, bytes - bytes_read);
@@ -306,10 +306,10 @@ static constexpr int TrapOpCode = 0xcc;
 void DFInstanceLinux::find_running_copy() {
     m_status = DFS_DISCONNECTED;
     // find PID of DF
-    TRACE << "attempting to find running copy of DF by executable name";
+    LOGT << "attempting to find running copy of DF by executable name";
 
     if(set_pid()){
-        TRACE << "USING PID:" << m_pid;
+        LOGT << "USING PID:" << m_pid;
     }else{
         return;
     }
@@ -353,7 +353,7 @@ void DFInstanceLinux::find_running_copy() {
             hash.addData(buffer, PAGE_SIZE);
         hash.addData(buffer, exe.gcount());
         md5 = hexify(hash.result().mid(0, 4)).toLower();
-        TRACE << "GOT MD5:" << md5;
+        LOGT << "GOT MD5:" << md5;
     }
     else {
         LOGE << "Failed to open DF executable";

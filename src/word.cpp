@@ -58,14 +58,14 @@ void Word::refresh_data() {
     }
     // make sure our reference is up to date to the active memory layout
     m_mem = m_df->memory_layout();
-    TRACE << "Starting refresh of Word data at" << hexify(m_address);
+    LOGT << "Starting refresh of Word data at" << hexify(m_address);
 
     read_members();
 }
 
 void Word::read_members() {
     m_base = m_df->read_string(m_mem->word_field(m_address, "base"));
-    TRACE << "read word " << m_base;
+    LOGT << "read word " << m_base;
     m_noun = m_df->read_string(m_mem->word_field(m_address, "noun_singular"));
     m_plural_noun = m_df->read_string(m_mem->word_field(m_address, "noun_plural"));
     m_adjective = m_df->read_string(m_mem->word_field(m_address, "adjective"));

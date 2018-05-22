@@ -221,10 +221,10 @@ void Dwarf::read_data() {
     }
     // make sure our reference is up to date to the active memory layout
     m_mem = m_df->memory_layout();
-    TRACE << "Starting refresh of unit data at" << hexify(m_address);
+    LOGT << "Starting refresh of unit data at" << hexify(m_address);
 
     int civ_id = m_df->read_int(m_mem->dwarf_field(m_address, "civ"));
-    TRACE << "  CIV:" << civ_id;
+    LOGT << "  CIV:" << civ_id;
 
     //read the core information we need to validate if we should continue loading this unit
     read_id();
@@ -255,7 +255,7 @@ void Dwarf::read_data() {
         //filter out any non-mercenary visitors if necessary
         if (m_df->fortress()->address())
             m_is_citizen = m_df->fortress()->hist_figures().contains(m_histfig_id);
-        TRACE << "HIST_FIG_ID:" << m_histfig_id;
+        LOGT << "HIST_FIG_ID:" << m_histfig_id;
         if(DT->hide_non_citizens() && !m_is_citizen && m_occ_type != OCC_MERC){
             set_validation("IGNORING visitor/guest",&validated,false,LL_DEBUG);
         }
@@ -448,7 +448,7 @@ QString Dwarf::get_migration_desc(){
 
 void Dwarf::read_id() {
     m_id = m_df->read_int(m_mem->dwarf_field(m_address, "id"));
-    TRACE << "UNIT ID:" << m_id;
+    LOGT << "UNIT ID:" << m_id;
 }
 
 static const char *sex_interest_icon_suffix (Dwarf::SEX_COMMITMENT interest)
@@ -471,7 +471,7 @@ void Dwarf::read_gender_orientation() {
     bool show_commitment = !m_is_animal && gender_info_option >= Option_ShowCommitment;
 
     BYTE sex = m_df->read_byte(m_mem->dwarf_field(m_address, "sex"));
-    TRACE << "GENDER:" << sex;
+    LOGT << "GENDER:" << sex;
     m_gender_info.gender = static_cast<GENDER_TYPE>(sex);
     m_gender_info.orientation = ORIENT_HETERO; //default
 
@@ -693,17 +693,17 @@ HistFigure* Dwarf::hist_figure(){
 void Dwarf::read_caste() {
     m_caste_id = m_df->read_short(m_mem->dwarf_field(m_address, "caste"));
     m_caste = m_race->get_caste_by_id(m_caste_id);
-    TRACE << "CASTE:" << m_caste_id;
+    LOGT << "CASTE:" << m_caste_id;
 }
 
 void Dwarf::read_flags(){
     m_unit_flags.clear();
     quint32 flags1 = m_df->read_addr(m_mem->dwarf_field(m_address, "flags1"));
-    TRACE << "  FLAGS1:" << hexify(flags1);
+    LOGT << "  FLAGS1:" << hexify(flags1);
     quint32 flags2 = m_df->read_addr(m_mem->dwarf_field(m_address, "flags2"));
-    TRACE << "  FLAGS2:" << hexify(flags2);
+    LOGT << "  FLAGS2:" << hexify(flags2);
     quint32 flags3 = m_df->read_addr(m_mem->dwarf_field(m_address, "flags3"));
-    TRACE << "  FLAGS3:" << hexify(flags3);
+    LOGT << "  FLAGS3:" << hexify(flags3);
     m_unit_flags << flags1 << flags2 << flags3;
     m_pending_flags = m_unit_flags;
 
@@ -714,7 +714,7 @@ void Dwarf::read_flags(){
 void Dwarf::read_race() {
     m_race_id = m_df->read_int(m_mem->dwarf_field(m_address, "race"));
     m_race = m_df->get_race(m_race_id);
-    TRACE << "RACE ID:" << m_race_id;
+    LOGT << "RACE ID:" << m_race_id;
     if(m_race){
         m_is_animal = (!m_race->flags().has_flag(CAN_LEARN) && m_race->caste_flag(TRAINABLE));
     }
@@ -724,7 +724,7 @@ void Dwarf::read_first_name() {
     m_first_name = m_df->read_string(m_mem->word_field(m_mem->dwarf_field(m_address, "name"), "first_name"));
     if (m_first_name.size() > 1)
         m_first_name[0] = m_first_name[0].toUpper();
-    TRACE << "FIRSTNAME:" << m_first_name;
+    LOGT << "FIRSTNAME:" << m_first_name;
 }
 
 void Dwarf::read_last_name(VIRTADDR name_offset) {
@@ -741,7 +741,7 @@ void Dwarf::read_last_name(VIRTADDR name_offset) {
 
 void Dwarf::read_nick_name() {
     m_nick_name = m_df->read_string(m_mem->word_field(m_mem->dwarf_field(m_address, "name"), "nickname"));
-    TRACE << "\tNICKNAME:" << m_nick_name;
+    LOGT << "\tNICKNAME:" << m_nick_name;
     m_pending_nick_name = m_nick_name;
 }
 
@@ -792,7 +792,7 @@ void Dwarf::read_profession() {
     // first see if there is a custom prof set...
     VIRTADDR custom_addr = m_mem->dwarf_field(m_address, "custom_profession");
     m_custom_prof_name = m_df->read_string(custom_addr);
-    TRACE << "\tCUSTOM PROF:" << m_custom_prof_name;
+    LOGT << "\tCUSTOM PROF:" << m_custom_prof_name;
 
     // we set both to the same to know it hasn't been edited yet
     m_pending_custom_profession = m_custom_prof_name;
@@ -836,7 +836,7 @@ void Dwarf::read_profession() {
         m_icn_prof = cp->get_pixmap();
 
     LOGD << "reading profession for" << nice_name() << m_raw_prof_id << prof_name;
-    TRACE << "EFFECTIVE PROFESSION:" << m_prof_name;
+    LOGT << "EFFECTIVE PROFESSION:" << m_prof_name;
 }
 
 void Dwarf::read_noble_position(){
@@ -1204,7 +1204,7 @@ void Dwarf::read_current_job(){
     VIRTADDR current_job_addr = m_df->read_addr(addr);
     m_current_sub_job_id.clear();
 
-    TRACE << "Current job addr: " << hex << current_job_addr;
+    LOGT << "Current job addr: " << hex << current_job_addr;
     if(current_job_addr != 0){
         m_current_job_id = m_df->read_short(m_mem->job_field(current_job_addr, "id"));
 
@@ -1227,7 +1227,7 @@ void Dwarf::read_current_job(){
                     Reaction* reaction = m_df->get_reaction(m_current_sub_job_id);
                     if(reaction!=0) {
                         m_current_job = capitalize(reaction->name());
-                        TRACE << "Sub job: " << m_current_sub_job_id << m_current_job;
+                        LOGT << "Sub job: " << m_current_sub_job_id << m_current_job;
                     }
                 }
             }
@@ -1294,7 +1294,7 @@ void Dwarf::read_current_job(){
         }
     }
 
-    TRACE << "CURRENT JOB:" << m_current_job_id << m_current_sub_job_id << m_current_job;
+    LOGT << "CURRENT JOB:" << m_current_job_id << m_current_sub_job_id << m_current_job;
 }
 
 bool Dwarf::read_soul(){
@@ -1319,9 +1319,9 @@ void Dwarf::read_soul_aspects() {
     read_attributes();
     read_personality();
 
-    TRACE << "SKILLS:" << m_skills.size();
-    TRACE << "TRAITS:" << m_traits.size();
-    TRACE << "ATTRIBUTES:" << m_attributes.size();
+    LOGT << "SKILLS:" << m_skills.size();
+    LOGT << "TRAITS:" << m_traits.size();
+    LOGT << "ATTRIBUTES:" << m_attributes.size();
 }
 
 
@@ -1842,7 +1842,7 @@ float Dwarf::get_coverage_rating(ITEM_TYPE itype){
 
 void Dwarf::read_turn_count() {
     m_turn_count = m_df->read_int(m_mem->dwarf_field(m_address, "turn_count"));
-    TRACE << "Turn Count:" << m_turn_count;
+    LOGT << "Turn Count:" << m_turn_count;
 }
 
 void Dwarf::read_skills() {
@@ -1853,7 +1853,7 @@ void Dwarf::read_skills() {
     m_moodable_skills.clear();
 
     QVector<VIRTADDR> entries = m_df->enumerate_vector(addr);
-    TRACE << "Reading skills for" << nice_name() << "found:" << entries.size();
+    LOGT << "Reading skills for" << nice_name() << "found:" << entries.size();
     short skill_id = 0;
     short rating = 0;
     int xp = 0;
@@ -2024,8 +2024,8 @@ void Dwarf::read_emotions(VIRTADDR personality_base){
             .arg(happiness_name(m_happiness))
             .arg(formatNumber(m_stress_level,DT->format_SI()));
 
-    TRACE << "\tRAW STRESS LEVEL:" << m_stress_level;
-    TRACE << "\tHAPPINESS:" << happiness_name(m_happiness);
+    LOGT << "\tRAW STRESS LEVEL:" << m_stress_level;
+    LOGT << "\tHAPPINESS:" << happiness_name(m_happiness);
 }
 
 void Dwarf::read_personality() {
@@ -2376,7 +2376,7 @@ void Dwarf::set_labor(int labor_id, bool enabled, bool update_cols_realtime) {
                 if(update_cols_realtime)
                     DT->update_specific_header(excluded,CT_LABOR);
             }
-            //TRACE << "LABOR" << labor_id << "excludes" << excluded;
+            //LOGT << "LABOR" << labor_id << "excludes" << excluded;
             m_pending_labors[excluded] = false;
         }
     }
