@@ -26,6 +26,7 @@ THE SOFTWARE.
 #include "dwarftherapist.h"
 #include "defines.h"
 #include "defaultfonts.h"
+#include "truncatingfilelogger.h"
 #include "utils.h"
 #include <QAction>
 #include <QMenu>
@@ -137,24 +138,27 @@ void RotatedHeader::paintSection(QPainter *p, const QRect &rect, int idx) const 
 
     QString data = this->model()->headerData(idx, Qt::Horizontal).toString();
     p->save();
-    p->setPen(complement(bg,0.25)); //Qt::black);
-    p->setRenderHint(QPainter::TextAntialiasing);
-    p->setFont(m_font);
-    QFontMetrics fm = p->fontMetrics();
+    p->setPen(Qt::NoPen);
+    p->setBrush(complement(bg,0.25)); //Qt::black);
+    p->setRenderHint(QPainter::Antialiasing);
+
+    QPainterPath text_path;
+    text_path.addText(0, 0, m_font, data);
+    QRectF text_rect = text_path.boundingRect();
+    text_path.translate(4.0, (rect.width() - text_rect.height())/2.0 - text_rect.y());
 
     if (m_header_text_bottom)
     {
         //flip column header text to read from bottom to top
-        p->translate(rect.x() + rect.width(), rect.height());
+        p->translate(rect.x(), rect.y() + rect.height());
         p->rotate(-90);
-        p->drawText(4,-rect.width() + ((rect.width()-fm.height()) / 2),rect.height()-10,rect.width(),1,data);
     }
     else
     {
-        p->translate(rect.x(), rect.y());
+        p->translate(rect.x() + rect.width(), rect.y()+5);
         p->rotate(90);
-        p->drawText(9, -((rect.width()-fm.height()) / 2) - (fm.height()/4), data); //wtf.. i have no idea but it's centered so i'll take it
     }
+    p->drawPath(text_path);
     p->restore();
 }
 
