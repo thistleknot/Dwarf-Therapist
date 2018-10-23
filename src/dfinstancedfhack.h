@@ -69,6 +69,14 @@ private:
     RemoteMemAccess::ReadString m_remote_read_string;
     RemoteMemAccess::WriteRaw m_remote_write_raw;
     RemoteMemAccess::WriteString m_remote_write_string;
+
+    static constexpr std::size_t PageSize = 4096;
+    std::map<VIRTADDR, std::array<char, PageSize>> m_page_cache;
+    const std::array<char, PageSize> &get_page(VIRTADDR page_addr);
+
+    int m_read_raw_count;
+    int m_read_string_count;
+    int m_page_download_count;
 };
 
 #endif // DFINSTANCE_LINUX_H

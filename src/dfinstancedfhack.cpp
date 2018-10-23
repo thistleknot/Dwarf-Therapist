@@ -9,6 +9,8 @@ constexpr char RemoteMemAccess::read_string[];
 constexpr char RemoteMemAccess::write_raw[];
 constexpr char RemoteMemAccess::write_string[];
 
+constexpr std::size_t DFInstanceDFHack::PageSize;
+
 DFInstanceDFHack::DFInstanceDFHack(QObject *parent)
     : DFInstance(parent)
     , m_connected(false)
@@ -40,6 +42,16 @@ DFInstanceDFHack::DFInstanceDFHack(QObject *parent)
 
 DFInstanceDFHack::~DFInstanceDFHack()
 {
+    if (m_connected) {
+        m_dfhack_client.disconnect();
+        QEventLoop event_loop;
+        connect(&m_dfhack_client, &DFHack::Client::connectionChanged,
+                &event_loop, &QEventLoop::quit);
+        connect(&m_dfhack_client, &DFHack::Client::socketError,
+                &event_loop, &QEventLoop::quit);
+        if (m_dfhack_client.disconnect())
+            event_loop.exec();
+    }
 }
 
 void DFInstanceDFHack::find_running_copy()
@@ -116,6 +128,10 @@ bool DFInstanceDFHack::attach()
         return true;
     }
 
+    m_page_cache.clear();
+    m_read_raw_count = 0;
+    m_read_string_count = 0;
+    m_page_download_count = 0;
     m_core_suspend.call().get();
 
     m_attach_count++;
@@ -131,6 +147,10 @@ bool DFInstanceDFHack::detach() {
         return true;
     }
 
+    m_page_cache.clear();
+    LOGD << "read_raw count:" << m_read_raw_count;
+    LOGD << "read_string count:" << m_read_string_count;
+    LOGD << "page downloaded:" << m_page_download_count;
     m_core_resume.call().get();
     LOGT << "FINISHED DETACH" << m_attach_count;
     return m_attach_count > 0;
@@ -141,18 +161,40 @@ bool DFInstanceDFHack::df_running()
     return m_connected;
 }
 
+const std::array<char, DFInstanceDFHack::PageSize> &DFInstanceDFHack::get_page(VIRTADDR page_addr)
+{
+    auto it = m_page_cache.lower_bound(page_addr);
+    if (it->first != page_addr) {
+        ++m_page_download_count;
+        it = m_page_cache.emplace_hint(it, std::piecewise_construct,
+                                       std::forward_as_tuple(page_addr),
+                                       std::forward_as_tuple());
+        m_remote_read_raw.in.set_address(page_addr);
+        m_remote_read_raw.in.set_length(PageSize);
+        if (m_remote_read_raw.call().get() != DFHack::CommandResult::Ok) {
+            LOGE << "Failed to read" << PageSize << "bytes from" << hexify(page_addr);
+        }
+        else {
+            std::copy(m_remote_read_raw.out.data().begin(), m_remote_read_raw.out.data().end(),
+                      it->second.begin());
+        }
+    }
+    return it->second;
+}
+
 USIZE DFInstanceDFHack::read_raw(const VIRTADDR addr, const USIZE bytes, void *buffer)
 {
-    m_remote_read_raw.in.set_address(addr);
-    m_remote_read_raw.in.set_length(bytes);
-    if (m_remote_read_raw.call().get() != DFHack::CommandResult::Ok) {
-        LOGE << "Failed to read" << bytes << "bytes from" << hexify(addr);
-        memset(buffer, 0, bytes);
-        return 0;
+    ++m_read_raw_count;
+    for (auto page_addr = addr & -PageSize; addr+bytes > page_addr; page_addr+=PageSize) {
+        const auto &page = get_page(page_addr);
+        if (addr > page_addr)
+            memcpy(buffer, &page[addr-page_addr],
+                   std::min<std::size_t>(bytes, page_addr+PageSize-addr));
+        else
+            memcpy(reinterpret_cast<char *>(buffer)+page_addr-addr, &page[0],
+                   std::min<std::size_t>(addr+bytes-page_addr, PageSize));
     }
-    const auto &data = m_remote_read_raw.out.data();
-    memcpy(buffer, data.data(), data.size());
-    return data.size();
+    return bytes;
 }
 
 USIZE DFInstanceDFHack::write_raw(const VIRTADDR addr, const USIZE bytes, const void *buffer)
@@ -166,15 +208,43 @@ USIZE DFInstanceDFHack::write_raw(const VIRTADDR addr, const USIZE bytes, const 
     return bytes;
 }
 
+static std::pair<VIRTADDR, std::size_t> check_string (DFInstance *df, VIRTADDR addr) {
+    constexpr auto error_pair = std::make_pair<VIRTADDR, std::size_t> (0, 0);
+    auto data_addr = df->read_addr(addr);
+    if (!data_addr)
+        return error_pair;
+    auto pointer_size = df->pointer_size();
+    std::vector<char> rep(3 * pointer_size);
+    if (!df->read_raw(data_addr-rep.size(), rep.size(), rep.data()))
+        return error_pair;
+    std::size_t length = 0, capacity = 0;
+    std::copy_n(&rep[0], pointer_size, reinterpret_cast<char *>(&length));
+    std::copy_n(&rep[pointer_size], pointer_size, reinterpret_cast<char *>(&capacity));
+    return length <= capacity ? std::make_pair(data_addr, length) : error_pair;
+}
+
 QString DFInstanceDFHack::read_string(const VIRTADDR addr)
 {
-    m_remote_read_string.in.set_address(addr);
-    if (m_remote_read_string.call().get() != DFHack::CommandResult::Ok) {
-        LOGE << "Failed to read string from" << hexify(addr);
-        return QString();
+    auto data = check_string(this, addr);
+    if (data.first) {
+        std::vector<char> buffer(data.second);
+        read_raw(data.first, buffer.size(), buffer.data());
+
+        return QTextCodec::codecForName("IBM437")->toUnicode(buffer.data(), buffer.size());
     }
-    const auto &data = m_remote_read_string.out.data();
-    return QTextCodec::codecForName("IBM437")->toUnicode(data.data(), data.size());
+    else {
+        LOGE << "Invalid string at" << hexify(addr);
+        return QString ();
+    }
+    // dead code
+    //++m_read_string_count;
+    //m_remote_read_string.in.set_address(addr);
+    //if (m_remote_read_string.call().get() != DFHack::CommandResult::Ok) {
+    //    LOGE << "Failed to read string from" << hexify(addr);
+    //    return QString();
+    //}
+    //const auto &data = m_remote_read_string.out.data();
+    //return QTextCodec::codecForName("IBM437")->toUnicode(data.data(), data.size());
 }
 
 USIZE DFInstanceDFHack::write_string(const VIRTADDR addr, const QString &str)

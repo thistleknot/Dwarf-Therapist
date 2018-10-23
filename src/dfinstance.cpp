@@ -296,6 +296,8 @@ QVector<VIRTADDR> DFInstance::enum_vec<VIRTADDR>(VIRTADDR addr) {
 
 void DFInstance::load_game_data()
 {
+    attach();
+
     emit progress_message(tr("Loading languages"));
     if(m_languages){
         delete m_languages;
@@ -333,6 +335,8 @@ void DFInstance::load_game_data()
     load_item_defs();
 
     load_fortress_name();
+
+    detach();
 }
 
 QString DFInstance::get_language_word(VIRTADDR addr){
@@ -820,6 +824,8 @@ const QString DFInstance::fortress_name(){
 }
 
 void DFInstance::refresh_data(){
+    attach();
+
     VIRTADDR current_year = m_layout->global_address("current_year");
     LOGD << "loading current year from" << hexify(current_year);
 
@@ -834,6 +840,8 @@ void DFInstance::refresh_data(){
     load_fortress();
     load_squads(true);
     load_items();
+
+    detach();
 }
 
 void DFInstance::load_items(){
