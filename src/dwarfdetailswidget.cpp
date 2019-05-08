@@ -319,6 +319,7 @@ void DwarfDetailsWidget::show_dwarf(Dwarf *d) {
 
     QFont bold_item_font = ui->tw_skills->font();
     bold_item_font.setBold(true);
+    int row_height = QFontMetrics(bold_item_font).height();
 
     // SKILLS TABLE
     QHash<int,Skill> *skills = d->get_skills();
@@ -333,7 +334,7 @@ void DwarfDetailsWidget::show_dwarf(Dwarf *d) {
         {
             real_count = ui->tw_skills->rowCount();
             ui->tw_skills->insertRow(real_count);
-            ui->tw_skills->setRowHeight(real_count, 18);
+            ui->tw_skills->setRowHeight(real_count, row_height);
 
             QTableWidgetItem *item_skill = new QTableWidgetItem(s.name());
             tooltip = tr("<center><h4>%1</h4></center>").arg(s.name());
@@ -413,7 +414,7 @@ void DwarfDetailsWidget::show_dwarf(Dwarf *d) {
 
     for (int row = 0; row < attributes->size(); ++row) {
         ui->tw_attributes->insertRow(0);
-        ui->tw_attributes->setRowHeight(0, 18);
+        ui->tw_attributes->setRowHeight(0, row_height);
         Attribute a = attributes->at(row);
 
         QTableWidgetItem *attribute_name = new QTableWidgetItem(a.get_name());
@@ -524,7 +525,7 @@ void DwarfDetailsWidget::show_dwarf(Dwarf *d) {
         val = roles.at(i).rating;
 
         ui->tw_roles->insertRow(0);
-        ui->tw_roles->setRowHeight(0, 18);
+        ui->tw_roles->setRowHeight(0, row_height);
 
         QTableWidgetItem *role_name = new QTableWidgetItem(name);
         role_name->setToolTip(tr("<center><h4>%1</h4></center>").arg(name));
@@ -556,7 +557,7 @@ void DwarfDetailsWidget::show_dwarf(Dwarf *d) {
         prefs = capitalize(d->get_grouped_preferences().value(name)->join(", "));
 
         ui->tw_prefs->insertRow(0);
-        ui->tw_prefs->setRowHeight(0, 18);
+        ui->tw_prefs->setRowHeight(0, row_height);
 
         QTableWidgetItem *pref_type = new QTableWidgetItem(name);
         pref_type->setToolTip(tr("<center><h4>%1</h4></center>").arg(name));
@@ -692,8 +693,9 @@ void DwarfDetailsWidget::add_belief_row(int belief_id, Dwarf *d, bool is_cultura
 }
 
 void DwarfDetailsWidget::add_personality_row(QString title, int raw_value, QString info, QString tooltip, QColor override_color){
+    int row_height = QFontMetrics(ui->tw_traits->font()).height();
     ui->tw_traits->insertRow(0);
-    ui->tw_traits->setRowHeight(0, 18);
+    ui->tw_traits->setRowHeight(0, row_height);
 
     QTableWidgetItem *trait_name = new QTableWidgetItem(title.mid(0,title.indexOf("<")));
     trait_name->setToolTip(tr("<center><h4 style=\"margin:0px;\">%1</h4></center>").arg(title));
