@@ -41,7 +41,6 @@ class QProgressBar;
 class QSettings;
 class QToolButton;
 class ScriptDialog;
-class Updater;
 class ViewManager;
 class optimizereditor;
 class RoleDialog;
@@ -119,7 +118,6 @@ public slots:
     void go_to_project_home();
     void go_to_new_issue();
     void go_to_latest_release();
-    void check_latest_version();
     void open_data_dir();
     void open_log_dir();
 
@@ -183,7 +181,6 @@ private:
     QToolButton *m_btn_optimize;
     QTimer *m_retry_connection;
 
-    Updater *m_updater;
     NotifierWidget *m_notifier;
 
     void showEvent(QShowEvent *evt);
