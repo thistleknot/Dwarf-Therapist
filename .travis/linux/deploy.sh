@@ -13,17 +13,6 @@ mv squashfs-root linuxdeployqt
 
 linuxdeployqt/AppRun "$APPDIR/usr/share/applications/dwarftherapist.desktop" -bundle-non-qt-libs -qmake=$QT_PREFIX/bin/qmake
 
-# Download patched AppRun for optional loading of libstdc++
-wget "https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/AppRun-patched-x86_64"
-chmod +x "AppRun-patched-x86_64"
-rm "$APPDIR/AppRun"
-cp "AppRun-patched-x86_64" "$APPDIR/AppRun"
-mkdir -p "$APPDIR/usr/optional/"{libstdc++,libgcc_s}
-wget "https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/exec-x86_64.so"
-cp "exec-x86_64.so" "$APPDIR/usr/optional/exec.so"
-cp "/usr/lib/x86_64-linux-gnu/libstdc++.so.6" "$APPDIR/usr/optional/libstdc++/"
-cp "/lib/x86_64-linux-gnu/libgcc_s.so.1" "$APPDIR/usr/optional/libgcc_s/"
-
 # Download and extract appimagetool
 wget "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
 chmod +x "appimagetool-x86_64.AppImage"

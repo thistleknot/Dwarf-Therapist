@@ -1,6 +1,6 @@
 git:
   depth: 1
-dist: trusty
+dist: xenial
 sudo: false
 language: cpp
 matrix:
@@ -11,18 +11,19 @@ matrix:
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:beineri/opt-qt-5.12.7-xenial'
           packages:
-            - g++-5
+            - g++
             - cmake
             - ninja-build
-            - qtbase5-dev
-            - qtbase5-dev-tools
-            - qtdeclarative5-dev
-            - qt5-qmake
+            - qt512base
+            - qt512declarative
+            - qt512tools
+            - mesa-common-dev
+            - libglu1-mesa-dev
       env:
-        - COMPILER=g++ CXX=g++-5 CC=gcc-5
-        - QT_PREFIX=/usr/lib/x86_64-linux-gnu/qt5
+        - COMPILER=g++
+        - QT_PREFIX=/opt/qt512
         - APPDIR=DwarfTherapist.AppDir
         - CMAKE_OPTIONS="-DCMAKE_INSTALL_PREFIX=$APPDIR/usr"
         - RELEASE_FILE='DwarfTherapist-*.AppImage'
