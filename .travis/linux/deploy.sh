@@ -5,13 +5,27 @@ ninja install
 # Add PDF manual
 install -m 0644 -D -t "$APPDIR/usr/share/doc/dwarftherapist/" "Dwarf Therapist.pdf"
 
+# Compile Qt style plugins
+git clone https://github.com/cvuchener/fusiondark
+cd fusiondark
+$QT_PREFIX/bin/qmake
+make
+sudo make install
+cd -
+git clone https://github.com/cvuchener/DarkStyle
+cd DarkStyle
+$QT_PREFIX/bin/qmake
+make
+sudo make install
+cd -
+
 # Download and extract linuxdeployqt (because of missing FUSE)
 wget "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
 chmod +x linuxdeployqt*.AppImage
 ./linuxdeployqt*.AppImage --appimage-extract
 mv squashfs-root linuxdeployqt
 
-linuxdeployqt/AppRun "$APPDIR/usr/share/applications/dwarftherapist.desktop" -bundle-non-qt-libs -qmake=$QT_PREFIX/bin/qmake
+linuxdeployqt/AppRun "$APPDIR/usr/share/applications/dwarftherapist.desktop" -extra-plugins=styles/libfusiondark.so,styles/libDarkStyle.so -bundle-non-qt-libs -qmake=$QT_PREFIX/bin/qmake
 
 # Download and extract appimagetool
 wget "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
