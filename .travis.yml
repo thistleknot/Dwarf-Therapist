@@ -6,7 +6,6 @@ language: cpp
 matrix:
   include:
     - os: linux
-      language: generic
       compiler: gcc
       addons:
         apt:
@@ -22,30 +21,52 @@ matrix:
             - mesa-common-dev
             - libglu1-mesa-dev
       env:
-        - COMPILER=g++
+        - CXXFLAGS="-Wall -Wextra -Werror=all"
+        - CMAKE_GENERATOR=Ninja
         - QT_PREFIX=/opt/qt512
         - APPDIR=DwarfTherapist.AppDir
-        - CMAKE_OPTIONS="-DCMAKE_INSTALL_PREFIX=$APPDIR/usr"
+        - CMAKE_OPTIONS="-GNinja -DCMAKE_INSTALL_PREFIX=$APPDIR/usr"
         - RELEASE_FILE='DwarfTherapist-*.AppImage'
     - os: osx
-      before_install:
-        - brew update
-        - brew install qt
-        - brew outdated cmake || brew upgrade cmake
-        - brew install ninja
       env:
-        - CXXFLAGS="$CXXFLAGS -mmacosx-version-min=10.9"
+        - CXXFLAGS="-Wall -Wextra -Werror=all -mmacosx-version-min=10.9"
+        - CMAKE_GENERATOR=Ninja
         - QT_PREFIX=/usr/local/opt/qt
         - CMAKE_PREFIX_PATH=$QT_PREFIX
         - RELEASE_FILE='DwarfTherapist-*.dmg'
-env:
-  global:
-    - CXXFLAGS="-Wall -Wextra -Werror=all"
+    - os: windows
+      env:
+        - QT_VERSION=5.12.8
+        - QT_ARCH=win64_msvc2017_64
+        - CMAKE_GENERATOR="Visual Studio 15 2017"
+        - CMAKE_OPTIONS="-A x64"
+        - QT_PREFIX="$TRAVIS_BUILD_DIR/Qt/5.12.8/msvc2017_64"
+        - CMAKE_PREFIX_PATH=$QT_PREFIX
+    - os: windows
+      env:
+        - QT_VERSION=5.6.3
+        - QT_ARCH=win32_msvc2015
+        - CMAKE_GENERATOR="Visual Studio 15 2017"
+        - CMAKE_OPTIONS="-A Win32 -T v140_xp"
+        - QT_PREFIX="$TRAVIS_BUILD_DIR/Qt/5.6.3/msvc2015"
+        - CMAKE_PREFIX_PATH=$QT_PREFIX
+before_install:
+  - ".travis/$TRAVIS_OS_NAME/before_install.sh"
 script:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then export NPROC=$(nproc);
-    elif [ "$TRAVIS_OS_NAME" == "osx" ]; then export NPROC=$(sysctl -n hw.ncpu);
-    else export NPROC=1; fi
-  - cmake -GNinja ${CMAKE_OPTIONS} . && ninja -j $NPROC -k 0
+  - cmake ${CMAKE_OPTIONS}
+  - |-
+      case $TRAVIS_OS_NAME in
+        linux)
+          ninja -j $(nproc)
+          ;;
+        osx)
+          ninja -j $(sysctl -n hw.ncpu)
+          ;;
+        windows)
+          "/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin/MSBuild.exe" DwarfTherapist.sln //p:Configuration=Release
+          ;;
+      esac
+
 notifications:
   irc:
     on_success: change
