@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ninja install
+cmake --install "$TRAVIS_BUILD_DIR/build"
 
 # Add PDF manual
 install -m 0644 -D -t "$APPDIR/usr/share/doc/dwarftherapist/" "Dwarf Therapist.pdf"

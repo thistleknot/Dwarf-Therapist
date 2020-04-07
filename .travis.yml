@@ -11,6 +11,8 @@ matrix:
         apt:
           sources:
             - sourceline: 'ppa:beineri/opt-qt-5.12.7-xenial'
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ xenial main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
           packages:
             - g++
             - cmake
@@ -25,14 +27,13 @@ matrix:
         - CMAKE_GENERATOR=Ninja
         - QT_PREFIX=/opt/qt512
         - APPDIR=DwarfTherapist.AppDir
-        - CMAKE_OPTIONS="-GNinja -DCMAKE_INSTALL_PREFIX=$APPDIR/usr"
+        - CMAKE_OPTIONS="-DCMAKE_INSTALL_PREFIX=$APPDIR/usr"
         - RELEASE_FILE='DwarfTherapist-*.AppImage'
     - os: osx
       env:
         - CXXFLAGS="-Wall -Wextra -Werror=all -mmacosx-version-min=10.9"
         - CMAKE_GENERATOR=Ninja
         - QT_PREFIX=/usr/local/opt/qt
-        - CMAKE_PREFIX_PATH=$QT_PREFIX
         - RELEASE_FILE='DwarfTherapist-*.dmg'
     - os: windows
       env:
@@ -41,7 +42,6 @@ matrix:
         - CMAKE_GENERATOR="Visual Studio 15 2017"
         - CMAKE_OPTIONS="-A x64"
         - QT_PREFIX="$TRAVIS_BUILD_DIR/Qt/5.12.8/msvc2017_64"
-        - CMAKE_PREFIX_PATH=$QT_PREFIX
     - os: windows
       env:
         - QT_VERSION=5.6.3
@@ -49,24 +49,13 @@ matrix:
         - CMAKE_GENERATOR="Visual Studio 15 2017"
         - CMAKE_OPTIONS="-A Win32 -T v140_xp"
         - QT_PREFIX="$TRAVIS_BUILD_DIR/Qt/5.6.3/msvc2015"
-        - CMAKE_PREFIX_PATH=$QT_PREFIX
 before_install:
   - ".travis/$TRAVIS_OS_NAME/before_install.sh"
 script:
-  - cmake ${CMAKE_OPTIONS}
-  - |-
-      case $TRAVIS_OS_NAME in
-        linux)
-          ninja -j $(nproc)
-          ;;
-        osx)
-          ninja -j $(sysctl -n hw.ncpu)
-          ;;
-        windows)
-          "/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin/MSBuild.exe" DwarfTherapist.sln //p:Configuration=Release
-          ;;
-      esac
-
+  - export PATH=${PATH//:\/usr\/local\/cmake-3.12.4\/bin/}
+  - cmake --version
+  - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$QT_PREFIX ${CMAKE_OPTIONS} -S "$TRAVIS_BUILD_DIR" -B "$TRAVIS_BUILD_DIR/build"
+  - cmake --build "$TRAVIS_BUILD_DIR/build" --parallel 4 --config Release
 notifications:
   irc:
     on_success: change
