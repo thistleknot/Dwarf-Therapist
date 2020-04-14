@@ -20,5 +20,5 @@ while ! hdiutil eject "/Volumes/Dwarf Therapist/" && [ "$retry" -gt 0 ]; do
     retry=$((retry-1))
     sleep 1
 done
-hdiutil convert DwarfTherapist.sparseimage -format UDBZ -o "DwarfTherapist-${TRAVIS_TAG}-${TRAVIS_OS_NAME}64.dmg"
+hdiutil convert DwarfTherapist.sparseimage -format UDBZ -o "DwarfTherapist-${TRAVIS_TAG}-${TRAVIS_OS_NAME}64-qt${QT_VERSION-latest}.dmg"
 
