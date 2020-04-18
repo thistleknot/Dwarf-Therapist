@@ -25,45 +25,39 @@ matrix:
       env:
         - CXXFLAGS="-Wall -Wextra -Werror=all"
         - CMAKE_GENERATOR=Ninja
-        - QT_PREFIX=/opt/qt512
-        - RELEASE_FILE='DwarfTherapist-*.AppImage'
+        - CMAKE_BUILD_TYPE=Release
     - os: osx
       env:
         - CXXFLAGS="-Wall -Wextra -Werror=all -mmacosx-version-min=10.13"
         - CMAKE_GENERATOR=Ninja
-        - QT_PREFIX=/usr/local/opt/qt
-        - RELEASE_FILE='DwarfTherapist-*.dmg'
+        - CMAKE_BUILD_TYPE=Release
     - os: osx
       env:
         - CXXFLAGS="-Wall -Wextra -Werror=all -mmacosx-version-min=10.9"
         - QT_VERSION=5.9.9
         - CMAKE_GENERATOR=Ninja
-        - QT_PREFIX="$TRAVIS_BUILD_DIR/Qt/5.9.9/clang_64"
-        - RELEASE_FILE='DwarfTherapist-*.dmg'
+        - CMAKE_BUILD_TYPE=Release
     - os: windows
       env:
         - QT_VERSION=5.12.8
         - QT_ARCH=win64_msvc2017_64
         - CMAKE_GENERATOR="Visual Studio 15 2017"
-        - CMAKE_OPTIONS="-A x64"
-        - QT_PREFIX="$TRAVIS_BUILD_DIR/Qt/5.12.8/msvc2017_64"
-        - RELEASE_FILE='DwarfTherapist-*.zip'
+        - CMAKE_GENERATOR_PLATFORM=x64
     - os: windows
       env:
         - QT_VERSION=5.6.3
         - QT_ARCH=win32_msvc2015
         - CMAKE_GENERATOR="Visual Studio 15 2017"
-        - CMAKE_OPTIONS="-A Win32 -T v140_xp"
-        - QT_PREFIX="$TRAVIS_BUILD_DIR/Qt/5.6.3/msvc2015"
-        - RELEASE_FILE='DwarfTherapist-*.zip'
+        - CMAKE_GENERATOR_PLATFORM=Win32
+        - CMAKE_GENERATOR_TOOLSET=v140_xp
 before_install:
-  - ".travis/$TRAVIS_OS_NAME/before_install.sh"
+  - source ".travis/$TRAVIS_OS_NAME/setup_deps.sh"
 script:
   - export PATH=${PATH//:\/usr\/local\/cmake-3.12.4\/bin/}
   - export SOURCE_DIR=$TRAVIS_BUILD_DIR
   - export BINARY_DIR=$TRAVIS_BUILD_DIR/build
   - cmake --version
-  - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$QT_PREFIX ${CMAKE_OPTIONS} -S "$SOURCE_DIR" -B "$BINARY_DIR"
+  - cmake -DCMAKE_PREFIX_PATH=$QT_PREFIX -S "$SOURCE_DIR" -B "$BINARY_DIR"
   - cmake --build "$TRAVIS_BUILD_DIR/build" --parallel 4 --config Release
 before_deploy:
   - ".travis/deploy.sh"
@@ -73,7 +67,7 @@ deploy:
   api_key:
     secure: rHA/q12iYbGRrwQTak2aAV38I1MHLpvA228KoNA6UcyPtfcLtjrfoKDIGa+Li/0onwUTCjyDgObMdYXrq4A5sznL2ezec6oFHETY6u7xqoEj3ITKqcLUKqQMhQ3p3hwO+Q8u0CpuwmAgDyiSwP7WNnVz0XD3qhu9ZEdM12wG0tp9IoyzayGePwDja12uDlESJtOof5HgVgq6rm2xvVFmQUK8Nzfe8o2mkSLVOjCoWGiP4YJtuE7lPOVF0AfzoxfRCY6UkELTJFaVADWWr8FRq8LPioej2zNToIvRw/5qnIfLRfINj2+Oyg5SVOdyT70J1I/1BH3YrPHJGlAsWiWvgthj8XR8TaLZuj6KTphla4cxgWNo11ozbykFDtW7ssbp8Xobos041YhDT9swkkrT+TQPWHAs3fvlOol9klLBjAeYUYQVgoFHykg9WeHsGLW5uyMCPEj38CM6Ma6X/TyGAPgWo6/QcrTfGk4rd8h3Z9wD2614WY5VZDjftggFqmotgkCybtvPg5EjHlNnq4tZ+RzR5tTzxCbTpCaVcGXKemo1QGn70HMcZdSFBpcqIM8sZISAjsEX3VYnOfCLightlvokl9KnVGRA3w26yem9+hfIWvFfahzF0RYJ8kQIVnqsQj8S5qocpaoT0g8THInDzeYmgsP/shCWgEzfEQ7jJ2I=
   file_glob: true
-  file: $RELEASE_FILE
+  file: DwarfTherapist-*.*
   skip_cleanup: true
   on:
     repo: cvuchener/Dwarf-Therapist
