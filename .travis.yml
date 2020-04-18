@@ -26,8 +26,6 @@ matrix:
         - CXXFLAGS="-Wall -Wextra -Werror=all"
         - CMAKE_GENERATOR=Ninja
         - QT_PREFIX=/opt/qt512
-        - APPDIR=DwarfTherapist.AppDir
-        - CMAKE_OPTIONS="-DCMAKE_INSTALL_PREFIX=$APPDIR/usr"
         - RELEASE_FILE='DwarfTherapist-*.AppImage'
     - os: osx
       env:
@@ -62,8 +60,10 @@ before_install:
   - ".travis/$TRAVIS_OS_NAME/before_install.sh"
 script:
   - export PATH=${PATH//:\/usr\/local\/cmake-3.12.4\/bin/}
+  - export SOURCE_DIR=$TRAVIS_BUILD_DIR
+  - export BINARY_DIR=$TRAVIS_BUILD_DIR/build
   - cmake --version
-  - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$QT_PREFIX ${CMAKE_OPTIONS} -S "$TRAVIS_BUILD_DIR" -B "$TRAVIS_BUILD_DIR/build"
+  - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$QT_PREFIX ${CMAKE_OPTIONS} -S "$SOURCE_DIR" -B "$BINARY_DIR"
   - cmake --build "$TRAVIS_BUILD_DIR/build" --parallel 4 --config Release
 before_deploy:
   - ".travis/deploy.sh"

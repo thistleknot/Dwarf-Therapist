@@ -1,6 +1,7 @@
 #!/bin/bash
 
-cmake --install "$TRAVIS_BUILD_DIR/build"
+export APPDIR=DwarfTherapist.AppDir
+cmake --install "$BINARY_DIR" --prefix "$APPDIR/usr"
 
 # Add PDF manual
 install -m 0644 -D -t "$APPDIR/usr/share/doc/dwarftherapist/" "Dwarf Therapist.pdf"

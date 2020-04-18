@@ -5,12 +5,12 @@ hdiutil resize -size 80m DwarfTherapist.sparseimage
 hdiutil mount DwarfTherapist.sparseimage
 
 # Prepare contents
-cp -R "DwarfTherapist.app/Contents" "/Volumes/Dwarf Therapist/DwarfTherapist.app/Contents"
-cp -f "CHANGELOG.txt" "/Volumes/Dwarf Therapist/"
-cp -f "LICENSE.txt" "/Volumes/Dwarf Therapist/"
-cp -f "README.rst" "/Volumes/Dwarf Therapist/"
+cp -R "$BINARY_DIR/DwarfTherapist.app/Contents" "/Volumes/Dwarf Therapist/DwarfTherapist.app/Contents"
+cp -f "$SOURCE_DIR/CHANGELOG.txt" "/Volumes/Dwarf Therapist/"
+cp -f "$SOURCE_DIR/LICENSE.txt" "/Volumes/Dwarf Therapist/"
+cp -f "$SOURCE_DIR/README.rst" "/Volumes/Dwarf Therapist/"
 mkdir -p "/Volumes/Dwarf Therapist/DwarfTherapist.app/Contents/Resources"
-cp -R "share/memory_layouts" "/Volumes/Dwarf Therapist/DwarfTherapist.app/Contents/Resources"
+cp -R "$SOURCE_DIR/share/memory_layouts" "/Volumes/Dwarf Therapist/DwarfTherapist.app/Contents/Resources"
 
 "$QT_PREFIX/bin/macdeployqt" "/Volumes/Dwarf Therapist/DwarfTherapist.app"
 
