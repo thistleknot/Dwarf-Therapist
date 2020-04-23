@@ -43,7 +43,7 @@ THE SOFTWARE.
 #include <QSettings>
 
 static const QColor COLOR_LOW = QColor(168, 10, 44, 255);
-static const QColor COLOR_HIGH = QColor(0, 60, 128, 255);
+//static const QColor COLOR_HIGH = QColor(0, 60, 128, 255);
 static const QColor COLOR_MOOD_HAD = QColor(125, 125, 125, 255);
 static const QColor COLOR_MOOD_HIGH = QColor(60, 148, 19, 255);
 
