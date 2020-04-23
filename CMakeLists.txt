@@ -239,6 +239,6 @@ elseif(WIN32)
             RUNTIME DESTINATION .)
     install(DIRECTORY share/
             DESTINATION data)
-    install(FILES LICENSE.txt README.rest CHANGELOG.txt ${CMAKE_BINARY_DIR}/lnp/manifest.json
+    install(FILES LICENSE.txt README.rst CHANGELOG.txt ${CMAKE_BINARY_DIR}/lnp/manifest.json
             DESTINATION .)
 endif()
