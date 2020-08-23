@@ -3106,7 +3106,15 @@ double Dwarf::calc_role_rating(Role *m_role){
     //weighted average percentile total
     double rating_total = 0.0;
     for (int i = 0; i < AspectCount; ++i)
+        if(rating_aspect[i] == 50.0f)
+        {
+            //exclude
+            global_aspect_weight_total = global_aspect_weight_total - global_aspect_weight[i];
+
+        }
+        else{
         rating_total += rating_aspect[i] * global_aspect_weight[i];
+        }
     rating_total /= global_aspect_weight_total;
 
     if(rating_total == 0.0)
